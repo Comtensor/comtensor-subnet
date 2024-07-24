@@ -1,9 +1,5 @@
-communex 
-typer
-uvicorn
-keylimiter
-pydantic-settings
+bittensor
 pytube
-python-dotenv
+pytz
 torch
 datatrove
