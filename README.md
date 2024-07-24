@@ -1,42 +1,47 @@
-# Commune Subnet Templeate
+# Comtensor Subnet
 
-Subnet template built on top of [CommuneX](https://github.com/agicommies/communex).
+Comtensor makes bridge between Commune-ai and Bittensor
 
-Lern how to structure, build and deploy a subnet on [Commune AI](https://communeai.org/)!
+## Overview
 
-## Dependencies
+Comtensor facilitates the connection between Commune.ai and the Bittensor subnet. Using Comtensor, you can get the top responses from the Bittensor subnet, enabling you to perform all tasks in Commune using the Bittensor network.
 
-The whole subnet template is built on top of the [CommuneX library / SDK](https://github.com/agicommies/communex).
-Which is truly the only essential dependency.
+## Installation
 
-Although in order to make the template more explict we also provide additional libraries.
-You can find the whole dependency list we used in the [requirements.txt](./requirements.txt) file.
-
-```txt
-communex
-typer
-uvicorn
-keylimiter
-pydantic-settings
+Clone the repository and install module.
+```sh
+cd comtensor-subnet
+python3 -m venv venv
+. venv/bin/activate
+pip install -e .
 ```
 
-## Miner
+### Miner
+
+#### Who can be miner?
+
+Only bittensor validators can be miner in comtensor.
+
+#### Running
+
+You need to update env file. You need to define the bittensor validator wallet information.
+```txt
+wallet_name="default"
+wallet_hotkey="default"
+```
 
 From the root of your project, you can just call **comx module serve**. For example:
 
 ```sh
-comx module serve commune-subnet-template.subnet.miner.model.Miner <name-of-your-com-key> [--subnets-whitelist <your-subnet-netuid>] \
-[--ip <text>] [--port <number>]
+comx module serve comtensor.miner.model.Miner <name-of-your-com-key> [--subnets-whitelist <your-subnet-netuid>] [--ip <text>] [--port <number>]
 ```
 
-## Validator
+### Validator
+
+#### Running
 
 To run the validator, just call the file in which you are executing `validator.validate_loop()`. For example:
 
 ```sh
-python3 -m commune-subnet-template.subnet.cli <name-of-your-com-key>
+python3 src/comtensor/cli.py <name-of-your-com-key> <--password >
 ```
-
-## Further reading
-
-For full documentation of the Commune AI ecosystem, please visit the [Official Commune Page](https://communeai.org/), and it's developer documentation. There you can learn about all subnet details, deployment, and more!

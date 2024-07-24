@@ -3,3 +3,7 @@ typer
 uvicorn
 keylimiter
 pydantic-settings
+pytube
+python-dotenv
+torch
+datatrove

@@ -4,6 +4,7 @@
 /data
 /volumes
 /result
+/venv
 
 /env/**/*.env
 
@@ -13,3 +14,5 @@ node_modules
 
 /.tests
 __pycache__
+
+.env
