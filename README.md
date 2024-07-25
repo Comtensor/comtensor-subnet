@@ -24,6 +24,16 @@ pip install -r requirements.txt
 
 Only bittensor validators can be miner in comtensor.
 
+#### Hardware requirements
+
+| Component    | Requirement   |
+| ------------ | ------------- |
+| CPU          | 4 core 2.4GHz |
+| RAM          | 8GB           |
+| Network Up   | 400Mbps       |
+| Network Down | 400Mbps       |
+| Storage      | 100GB         |
+
 #### Running
 
 You need to update env file. You need to define the bittensor validator wallet information.
@@ -39,6 +49,16 @@ comx module serve comtensor.miner.model.Miner <name-of-your-com-key> [--subnets-
 ```
 
 ### Validator
+
+#### Hardware requirements
+
+| Component    | Requirement   |
+| ------------ | ------------- |
+| CPU          | 8 core 2.4GHz |
+| RAM          | 32GB          |
+| Network Up   | 400Mbps       |
+| Network Down | 400Mbps       |
+| Storage      | 100GB         |
 
 #### Running
 
