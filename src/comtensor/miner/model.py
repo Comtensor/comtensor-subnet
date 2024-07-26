@@ -83,11 +83,15 @@ class Miner(Module):
             None
         """
 
-        print(f"Answering: `{prompt}` with model `{type}`")
+        print(f"<--- ⛏️ Incoming Request ---- Type: {type} Netuid: {netuid} ----\n {prompt}")
         result = {}
-        if type == "prompt":
-            if netuid == 18:
-                result["answer"] = await cortex_crossval.run(CortexItem(type="text", provider="OpenAI", prompt=prompt))
+        try:
+            if type == "prompt":
+                if netuid == 18:
+                    result["answer"] = await cortex_crossval.run(CortexItem(type="text", provider="OpenAI", prompt=prompt))
+            print("---> ✅ Sent Success Response To Below Endpoint")
+        except Exception as e:
+            print("<--- ❌ Sent Blank Response To Below Endpoint\n{e}")
         return result
 
 if __name__ == "__main__":
