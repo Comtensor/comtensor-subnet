@@ -224,6 +224,8 @@ class TextValidator(Module):
         connection, miner_key = miner_info
         module_ip, module_port = connection
         client = ModuleClient(module_ip, int(module_port), self.key)
+        uid = self.client.get_uids(miner_key, self.netuid)
+        log(f"--->⛏️ UID:{uid} {miner_info}")
         try:
             # handles the communication with the miner
             miner_answer = asyncio.run(
@@ -239,10 +241,10 @@ class TextValidator(Module):
                 )
             )
             miner_answer = miner_answer["answer"]
-            log(f"✅ {miner_answer}")
+            log(f"<---✅ UID:{uid} {miner_info}")
 
         except Exception as e:
-            log(f"Miner {module_ip}:{module_port} failed to generate an answer")
+            log(f"<---❌ Miner UID:{uid} {module_ip}:{module_port} failed to generate an answer")
             print(e)
             miner_answer = None
         return miner_answer
@@ -336,6 +338,7 @@ class TextValidator(Module):
 
         # the blockchain call to set the weights
         _ = set_weights(settings, score_dict, self.netuid, self.client, self.key)
+        log(f"✅ Set weights successfully {score_dict}")
 
     def validation_loop(self, settings: ValidatorSettings) -> None:
         """
