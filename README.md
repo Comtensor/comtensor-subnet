@@ -54,6 +54,10 @@ From the root of your project, you can just call **comx module serve**. For exam
 ```sh
 comx module serve comtensor.miner.model.Miner <name-of-your-com-key> --subnets-whitelist 6 --ip <text> --port <number>
 ```
+> Note: If you already have the module that regitered in the subnet without none address and port. You need to update that module with your running address and port.
+> ```sh
+> comx module update <name-of-your-com-key> --ip <text> --port <port> --netuid 6
+> ```
 
 ### Validator
 
