@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 ### Register Module on comtensor subnet (netuid 6)
 ```sh
-comx module register --netuid 6 --key <your-key-name> <module-name> <ip> <port>
+comx module register <module-name>  <your-key-name> --netuid 6
 ```
 
 ### Miner
