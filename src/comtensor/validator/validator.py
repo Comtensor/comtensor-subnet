@@ -33,6 +33,11 @@ from communex.module.module import Module  # type: ignore
 from communex.types import Ss58Address  # type: ignore
 from substrateinterface import Keypair  # type: ignore
 
+from sklearn.feature_extraction.text import CountVectorizer
+from scipy.spatial.distance import dice
+from difflib import SequenceMatcher
+from jellyfish import jaro_winkler_similarity
+
 from ._config import ValidatorSettings
 from ..utils import log
 
@@ -228,6 +233,7 @@ class TextValidator(Module):
         log(f"--->⛏️ UID:{uid} {miner_info}")
         try:
             # handles the communication with the miner
+            start_time = time.time()
             miner_answer = asyncio.run(
                 client.call(
                     "generate",
@@ -241,6 +247,9 @@ class TextValidator(Module):
                 )
             )
             miner_answer = miner_answer["answer"]
+            end_time = time.time()
+            response_time = end_time - start_time
+            miner_answer["response_time"] = response_time
             log(f"<---✅ UID:{uid} {miner_info}")
 
         except Exception as e:
@@ -249,7 +258,40 @@ class TextValidator(Module):
             miner_answer = None
         return miner_answer
 
-    def _score_miner(self, miner_answer: str | None) -> float:
+    def calculate_jaro_winkler_scores(self, strings):
+        n = len(strings)
+        scores = [0] * n
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    similarity = jaro_winkler_similarity(strings[i], strings[j])
+                    scores[i] += similarity * 0.1
+        return scores
+
+    def calculate_dice_similarity_scores(self, strings):
+        vectorizer = CountVectorizer(analyzer='char', ngram_range=(2, 2))
+        X = vectorizer.fit_transform(strings).toarray()
+        n = len(strings)
+        scores = [0] * n
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    similarity = 1 - dice(X[i], X[j])
+                    scores[i] += similarity * 0.1
+        return scores
+
+    def calculate_ratcliff_obershelp_scores(self, strings):
+        n = len(strings)
+        scores = [0] * n
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    similarity = SequenceMatcher(None, strings[i], strings[j]).ratio()
+                    scores[i] += similarity * 0.1
+        return scores
+
+
+    def _score_miner(self, miner_res, miner_uids, miner_time):
         """
         Score the generated answer against the validator's own answer.
 
@@ -260,10 +302,16 @@ class TextValidator(Module):
             The score assigned to the miner's answer.
         """
 
-        # Implement your custom scoring logic here
-        if not miner_answer:
-            return 0
-        return 1
+        jaro_winkler_scores = self.calculate_jaro_winkler_scores(miner_res)
+        dice_scores = self.calculate_dice_similarity_scores(miner_res)
+        ratcliff_obershelp_scores = self.calculate_ratcliff_obershelp_scores(miner_res)
+
+        score_dict: dict[int, float] = {}
+        for i, time in enumerate(miner_time):
+            time = max(time, 1)
+            score_dict[miner_uids[i]] = ((jaro_winkler_scores[i] + dice_scores[i] + ratcliff_obershelp_scores[i]) / 3 * 0.8 + (1 / time) * 0.2) * 420.0
+            score_dict[miner_uids[i]] = min(score_dict[miner_uids[i]], 420)
+        return score_dict
 
     def get_miner_prompt(self) -> str:
         """
@@ -320,17 +368,18 @@ class TextValidator(Module):
             it = executor.map(get_miner_prediction, modules_info.values())
             miner_answers = [*it]
 
+        miner_res, miner_time, miner_uids = [], [], []
         for uid, miner_response in zip(modules_info.keys(), miner_answers):
             miner_answer = miner_response
             if not miner_answer:
                 log(f"Skipping miner {uid} that didn't answer")
                 continue
 
-            score = self._score_miner(miner_answer)
-            time.sleep(0.5)
-            # score has to be lower or eq to 1, as one is the best score, you can implement your custom logic
-            assert score <= 1
-            score_dict[uid] = score
+            miner_res.append(miner_response['response'])
+            miner_time.append(miner_response['response_time'])
+            miner_uids.append(uid)
+        
+        score_dict = self._score_miner(miner_res, miner_uids, miner_time)
 
         if not score_dict:
             log("No miner managed to give a valid answer")

@@ -4,3 +4,4 @@ pytube
 pytz
 torch
 datatrove
+jellyfish
