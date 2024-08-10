@@ -1,5 +1,4 @@
 bittensor
-communex
 pytube
 pytz
 torch
