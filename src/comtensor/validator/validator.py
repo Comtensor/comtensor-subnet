@@ -44,6 +44,19 @@ from ..utils import log
 IP_REGEX = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+")
 
 
+def normalize_scores(scores):
+    min_score = min(scores)
+    max_score = max(scores)
+
+    if min_score == max_score:
+        # If all scores are the same, give all ones
+        return [1] * len(scores)
+
+    # Normalize scores from 0 to 1
+    normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
+
+    return normalized_scores
+
 def set_weights(
     settings: ValidatorSettings,
     score_dict: dict[
@@ -65,17 +78,23 @@ def set_weights(
     """
 
     # you can replace with `max_allowed_weights` with the amount your subnet allows
-    score_dict = cut_to_max_allowed_weights(score_dict, settings.max_allowed_weights)
+    log(f"{score_dict}")
+    full_score_dict = score_dict
+    full_score_dict = cut_to_max_allowed_weights(full_score_dict, settings.max_allowed_weights)
 
     # Create a new dictionary to store the weighted scores
     weighted_scores: dict[int, int] = {}
 
+    abnormal_scores = full_score_dict.values()
+    normal_scores = normalize_scores(abnormal_scores)
+    sc_dict = {uid: score for uid, score in zip(full_score_dict.keys(), normal_scores)}
+    print(f"{sc_dict}")
     # Calculate the sum of all inverted scores
-    scores = sum(score_dict.values())
+    scores = sum(sc_dict.values())
 
     # process the scores into weights of type dict[int, int] 
     # Iterate over the items in the score_dict
-    for uid, score in score_dict.items():
+    for uid, score in sc_dict.items():
         # Calculate the normalized weight as an integer
         weight = int(score * 1000 / scores)
 
@@ -88,7 +107,9 @@ def set_weights(
 
     uids = list(weighted_scores.keys())
     weights = list(weighted_scores.values())
-    # send the blockchain call
+
+    log(f"✅ Set weights successfully {weighted_scores}")
+
     client.vote(key=key, uids=uids, weights=weights, netuid=netuid)
 
 
@@ -386,7 +407,6 @@ class TextValidator(Module):
 
         # the blockchain call to set the weights
         _ = set_weights(settings, score_dict, self.netuid, self.client, self.key)
-        log(f"✅ Set weights successfully {score_dict}")
 
     def validation_loop(self, settings: ValidatorSettings) -> None:
         """
