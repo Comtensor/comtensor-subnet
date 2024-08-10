@@ -309,8 +309,8 @@ class TextValidator(Module):
         score_dict: dict[int, float] = {}
         for i, time in enumerate(miner_time):
             time = max(time, 1)
-            score_dict[miner_uids[i]] = ((jaro_winkler_scores[i] + dice_scores[i] + ratcliff_obershelp_scores[i]) / 3 * 0.8 + (1 / time) * 0.2) * 420.0
-            score_dict[miner_uids[i]] = min(score_dict[miner_uids[i]], 420)
+            score = ((jaro_winkler_scores[i] + dice_scores[i] + ratcliff_obershelp_scores[i]) / 3 * 0.8 + (1 / time) * 0.2) * 420.0
+            score_dict[miner_uids[i]] = min(score, 420.0)
         return score_dict
 
     def get_miner_prompt(self) -> str:
