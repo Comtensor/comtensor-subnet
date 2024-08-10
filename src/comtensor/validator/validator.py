@@ -268,7 +268,7 @@ class TextValidator(Module):
                     scores[i] += similarity * 0.1
         return scores
 
-    def calculate_dice_similarity_scores(strings):
+    def calculate_dice_similarity_scores(self, strings):
         vectorizer = CountVectorizer(analyzer='char', ngram_range=(2, 2))
         X = vectorizer.fit_transform(strings).toarray()
         n = len(strings)
