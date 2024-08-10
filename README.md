@@ -12,7 +12,7 @@ Comtensor facilitates the connection between Commune.ai and the Bittensor subnet
 
 Clone the repository and install module.
 ```sh
-git clone git@github.com:Comtensor/comtensor-subnet.git
+git clone https://github.com/Comtensor/comtensor-subnet.git
 cd comtensor-subnet
 python3 -m venv venv
 . venv/bin/activate
