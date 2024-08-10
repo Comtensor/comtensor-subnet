@@ -78,7 +78,6 @@ def set_weights(
     """
 
     # you can replace with `max_allowed_weights` with the amount your subnet allows
-    log(f"{score_dict}")
     full_score_dict = score_dict
     full_score_dict = cut_to_max_allowed_weights(full_score_dict, settings.max_allowed_weights)
 
@@ -88,7 +87,6 @@ def set_weights(
     abnormal_scores = full_score_dict.values()
     normal_scores = normalize_scores(abnormal_scores)
     sc_dict = {uid: score for uid, score in zip(full_score_dict.keys(), normal_scores)}
-    print(f"{sc_dict}")
     # Calculate the sum of all inverted scores
     scores = sum(sc_dict.values())
 
@@ -101,13 +99,11 @@ def set_weights(
         # Add the weighted score to the new dictionary
         weighted_scores[uid] = weight
 
-
     # filter out 0 weights
     weighted_scores = {k: v for k, v in weighted_scores.items() if v != 0}
 
     uids = list(weighted_scores.keys())
     weights = list(weighted_scores.values())
-
     log(f"✅ Set weights successfully {weighted_scores}")
 
     client.vote(key=key, uids=uids, weights=weights, netuid=netuid)
