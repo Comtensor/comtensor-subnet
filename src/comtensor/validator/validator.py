@@ -273,16 +273,11 @@ class TextValidator(Module):
         X = vectorizer.fit_transform(strings).toarray()
         n = len(strings)
         scores = [0] * n
-        
         for i in range(n):
             for j in range(n):
                 if i != j:
-                    # Calculate the number of shared bigrams
-                    intersection = sum(min(X[i][k], X[j][k]) for k in range(len(X[i])))
-                    total = sum(X[i]) + sum(X[j])
-                    similarity = 2 * intersection / total
-                    scores[i] += similarity
-        
+                    similarity = 1 - dice(X[i], X[j])
+                    scores[i] += similarity * 0.1
         return scores
 
     def calculate_ratcliff_obershelp_scores(self, strings):
@@ -314,7 +309,7 @@ class TextValidator(Module):
         score_dict: dict[int, float] = {}
         for i, time in enumerate(miner_time):
             time = max(time, 1)
-            score_dict[miner_uids[i]] = ((jaro_winkler_scores[i] + dice_scores[i] + ratcliff_obershelp_scores[i]) / 3 * 0.8 + (1 / time) * 0.2) * 420.0
+            score_dict[miner_uids[i]] = (jaro_winkler_scores[i] + dice_scores[i] + ratcliff_obershelp_scores[i]) / 3 * 0.8 + (1 / time) * 0.2
         return score_dict
 
     def get_miner_prompt(self) -> str:
