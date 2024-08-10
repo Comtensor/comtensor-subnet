@@ -1,6 +1,6 @@
 bittensor
-communex
 pytube
 pytz
 torch
 datatrove
+jellyfish
