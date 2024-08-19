@@ -6,7 +6,7 @@ Comtensor makes bridge between Commune-ai and Bittensor
 
 ## Documentation
 
-[Miner Docs](docs/miners.md) | [Validator Docs](docs/validators.md) | [Discord](https://discord.com) | [Homepage](https://comtensor.io/)
+[Miner Docs](docs/miners.md) | [Validator Docs](docs/validators.md) | [Discord](https://discord.com) | [Homepage](https://comtensor.io/) | [Video](https://comtensor.io/videos/comtensor.mp4)
 
 ## Overview
 
