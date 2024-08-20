@@ -104,9 +104,12 @@ def set_weights(
 
     uids = list(weighted_scores.keys())
     weights = list(weighted_scores.values())
-    log(f"✅ Set weights successfully {weighted_scores}")
 
-    client.vote(key=key, uids=uids, weights=weights, netuid=netuid)
+    try:
+        client.vote(key=key, uids=uids, weights=weights, netuid=netuid)
+        log(f"✅ Set weights successfully {weighted_scores}")
+    except Exception as e:
+        log(f"❌ Failed to set weights: {e}")
 
 
 def cut_to_max_allowed_weights(
