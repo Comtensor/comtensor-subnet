@@ -16,27 +16,27 @@
 ## How to run a Validator
 
 1) Clone Project
-```
+```sh
 git clone https://github.com/Comtensor/comtensor-subnet.git
 ```
 
-2) Create Vitural Environment
-```
+2) Create Virtual Environment
+```sh
 cd comtensor-subnet
 python3 -m venv venv
 . venv/bin/activate
 ```
 
 3) Install dependencies
-```
+```sh
 pip install -e .
 pip install -r requirements.txt
 pip install -U communex
 ```
 
 4) Register Validator
-```
-comx module register <name> <your_commune_key> --netuid 6
+```sh
+comx module register <module-name> <your-key-name> 6
 ```
 
 5) Run Validator
