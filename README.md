@@ -47,7 +47,6 @@ pip install -U communex
 ```
 
 ### Register Module on Comtensor Subnet (netuid 6)
-
 ```sh
 comx module register <module-name> <your-key-name> 6
 ```
