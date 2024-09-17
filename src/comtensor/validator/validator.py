@@ -441,5 +441,5 @@ class TextValidator(Module):
             elapsed = time.time() - start_time
             if elapsed < settings.iteration_interval:
                 sleep_time = settings.iteration_interval - elapsed
-                # log(f"Sleeping for {sleep_time}")
-                # time.sleep(sleep_time)
+                log(f"Sleeping for {sleep_time}")
+                time.sleep(sleep_time)
