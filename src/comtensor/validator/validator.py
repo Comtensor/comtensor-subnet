@@ -53,9 +53,12 @@ def normalize_scores(scores):
         return [1] * len(scores)
 
     # Normalize scores from 0 to 1
-    normalized_scores = [(score - min_score) / (max_score - min_score) for score in scores]
+    normalized_scores = [
+        (score - min_score) / (max_score - min_score) for score in scores
+    ]
 
     return normalized_scores
+
 
 def set_weights(
     settings: ValidatorSettings,
@@ -79,7 +82,9 @@ def set_weights(
 
     # you can replace with `max_allowed_weights` with the amount your subnet allows
     full_score_dict = score_dict
-    full_score_dict = cut_to_max_allowed_weights(full_score_dict, settings.max_allowed_weights)
+    full_score_dict = cut_to_max_allowed_weights(
+        full_score_dict, settings.max_allowed_weights
+    )
 
     # Create a new dictionary to store the weighted scores
     weighted_scores: dict[int, int] = {}
@@ -90,7 +95,7 @@ def set_weights(
     # Calculate the sum of all inverted scores
     scores = sum(sc_dict.values())
 
-    # process the scores into weights of type dict[int, int] 
+    # process the scores into weights of type dict[int, int]
     # Iterate over the items in the score_dict
     for uid, score in sc_dict.items():
         # Calculate the normalized weight as an integer
@@ -141,7 +146,9 @@ def extract_address(string: str):
     return re.search(IP_REGEX, string)
 
 
-def get_subnet_netuid(clinet: CommuneClient, subnet_name: str = "replace-with-your-subnet-name"):
+def get_subnet_netuid(
+    clinet: CommuneClient, subnet_name: str = "replace-with-your-subnet-name"
+):
     """
     Retrieve the network UID of the subnet.
 
@@ -258,11 +265,7 @@ class TextValidator(Module):
                 client.call(
                     "generate",
                     miner_key,
-                    {
-                        "prompt": question,
-                        "type": "prompt",
-                        "netuid": 18
-                     },
+                    {"prompt": question, "type": "prompt", "netuid": 18},
                     timeout=self.call_timeout,  #  type: ignore
                 )
             )
@@ -273,7 +276,9 @@ class TextValidator(Module):
             log(f"<---✅ UID:{uid} {miner_info}")
 
         except Exception as e:
-            log(f"<---❌ Miner UID:{uid} {module_ip}:{module_port} failed to generate an answer")
+            log(
+                f"<---❌ Miner UID:{uid} {module_ip}:{module_port} failed to generate an answer"
+            )
             print(e)
             miner_answer = None
         return miner_answer
@@ -289,16 +294,27 @@ class TextValidator(Module):
         return scores
 
     def calculate_dice_similarity_scores(self, strings):
-        vectorizer = CountVectorizer(analyzer='char', ngram_range=(2, 2))
-        X = vectorizer.fit_transform(strings).toarray()
-        n = len(strings)
+        # Filter out empty strings or strings with only stop words
+        filtered_strings = [s for s in strings if s.strip()]
+        if not filtered_strings:
+            return [0] * len(strings)
+
+        vectorizer = CountVectorizer(analyzer="char", ngram_range=(2, 2))
+        X = vectorizer.fit_transform(filtered_strings).toarray()
+        n = len(filtered_strings)
         scores = [0] * n
         for i in range(n):
             for j in range(n):
                 if i != j:
                     similarity = 1 - dice(X[i], X[j])
                     scores[i] += similarity * 0.1
-        return scores
+
+        # Map scores back to the original list of strings
+        original_scores = [0] * len(strings)
+        for i, s in enumerate(strings):
+            if s.strip():
+                original_scores[i] = scores[filtered_strings.index(s)]
+        return original_scores
 
     def calculate_ratcliff_obershelp_scores(self, strings):
         n = len(strings)
@@ -309,7 +325,6 @@ class TextValidator(Module):
                     similarity = SequenceMatcher(None, strings[i], strings[j]).ratio()
                     scores[i] += similarity * 0.1
         return scores
-
 
     def _score_miner(self, miner_res, miner_uids, miner_time):
         """
@@ -329,7 +344,9 @@ class TextValidator(Module):
         score_dict: dict[int, float] = {}
         for i, time in enumerate(miner_time):
             time = max(time, 1)
-            score_dict[miner_uids[i]] = (jaro_winkler_scores[i] + dice_scores[i] + ratcliff_obershelp_scores[i]) / 3 * 0.8 + (1 / time) * 0.2
+            score_dict[miner_uids[i]] = (
+                jaro_winkler_scores[i] + dice_scores[i] + ratcliff_obershelp_scores[i]
+            ) / 3 * 0.8 + (1 / time) * 0.2
         return score_dict
 
     def get_miner_prompt(self) -> str:
@@ -341,14 +358,16 @@ class TextValidator(Module):
         """
 
         # Implement your custom prompt generation logic here
-        data_reader = ParquetReader("hf://datasets/HuggingFaceFW/fineweb/data", limit=100) 
+        data_reader = ParquetReader(
+            "hf://datasets/HuggingFaceFW/fineweb/data", limit=100
+        )
         random_number = random.randint(0, 99)
         for i, document in enumerate(data_reader()):
             if random_number < i:
                 return document.text
 
     async def validate_step(
-        self, syntia_netuid: int, settings: ValidatorSettings
+        self, comtensor_netuid: int, settings: ValidatorSettings
     ) -> None:
         """
         Perform a validation step.
@@ -357,12 +376,12 @@ class TextValidator(Module):
         and scores the generated answers against the validator's own answers.
 
         Args:
-            syntia_netuid: The network UID of the subnet.
+            comtensor_netuid: The network UID of the subnet.
         """
 
         # retrive the miner information
-        modules_adresses = self.get_addresses(self.client, syntia_netuid)
-        modules_keys = self.client.query_map_key(syntia_netuid)
+        modules_adresses = self.get_addresses(self.client, comtensor_netuid)
+        modules_keys = self.client.query_map_key(comtensor_netuid)
         val_ss58 = self.key.ss58_address
         if val_ss58 not in modules_keys.values():
             raise RuntimeError(f"validator key {val_ss58} is not registered in subnet")
@@ -394,10 +413,10 @@ class TextValidator(Module):
                 log(f"Skipping miner {uid} that didn't answer")
                 continue
 
-            miner_res.append(miner_response['response'])
-            miner_time.append(miner_response['response_time'])
+            miner_res.append(miner_response["response"])
+            miner_time.append(miner_response["response_time"])
             miner_uids.append(uid)
-        
+
         score_dict = self._score_miner(miner_res, miner_uids, miner_time)
 
         if not score_dict:
